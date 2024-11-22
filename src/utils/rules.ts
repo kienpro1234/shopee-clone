@@ -3,10 +3,7 @@ import { formData } from "../pages/Register/Register";
 import * as yup from "yup";
 
 export type Rules = {
-  [key in
-    | "email"
-    | "password"
-    | "confirmed_password"]?: RegisterOptions<formData>;
+  [key in "email" | "password" | "confirmed_password"]?: RegisterOptions<formData>;
 };
 
 export const getRules = (getValues?: UseFormGetValues<formData>): Rules => ({
@@ -63,6 +60,14 @@ export const getRules = (getValues?: UseFormGetValues<formData>): Rules => ({
   },
 });
 
+function testMinMax(this: yup.TestContext<yup.AnyObject>) {
+  const { price_min, price_max } = this.parent as { price_min: string; price_max: string };
+  if (price_min !== "" && price_max !== "") {
+    return Number(price_max) >= Number(price_min);
+  }
+  return price_min !== "" || price_max !== "";
+}
+
 export const schema = yup
   .object({
     email: yup
@@ -83,6 +88,17 @@ export const schema = yup
       .min(6, "Độ dài email không được bé hơn 6")
       .max(160, "Độ dài email không được lớn hơn 160")
       .oneOf([yup.ref("password")], "Nhập lại mật khẩu không khớp"),
+
+    price_min: yup.string().test({
+      name: "price-not-allowed",
+      message: "Giá không phù hợp",
+      test: testMinMax,
+    }),
+    price_max: yup.string().test({
+      name: "price-not-allowed",
+      message: "Giá không phù hợp",
+      test: testMinMax,
+    }),
   })
   .required();
 

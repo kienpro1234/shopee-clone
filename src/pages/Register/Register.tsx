@@ -1,14 +1,18 @@
 import { useForm } from "react-hook-form";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { yupResolver } from "@hookform/resolvers/yup";
 import _ from "lodash";
 
 import { schema } from "../../utils/rules";
-import { registerAccount } from "../../apis/auth.api";
+import authApi from "../../apis/auth.api";
 import Input from "../../components/UI/Input/Input";
 import { isUnprocessableEntity } from "../../utils/utils";
-import { ResponseApi } from "../../types/utils.type";
+import { ErrorResponse } from "../../types/utils.type";
+import { toast } from "react-toastify";
+import ButtonRegister from "../../components/UI/ButtonRegister";
+import { useContext } from "react";
+import { AppContext } from "../../context/app.context";
 
 export interface formData {
   email: string;
@@ -17,6 +21,8 @@ export interface formData {
 }
 
 export default function Register() {
+  const navigate = useNavigate();
+  const { setIsAuthenticated, setProfile } = useContext(AppContext);
   const {
     register,
     // watch,
@@ -33,13 +39,16 @@ export default function Register() {
   });
 
   const useRegisterMutation = useMutation({
-    mutationFn: (body: Omit<formData, "confirmed_password">) => registerAccount(body),
+    mutationFn: (body: Omit<formData, "confirmed_password">) => authApi.registerAccount(body),
     onSuccess: (data) => {
-      console.log(data);
+      setIsAuthenticated(true);
+      setProfile(data.data.data.user);
+      toast.success("Đăng kí thành công");
+      navigate("/login");
     },
     onError: (error) => {
       console.error(error);
-      if (isUnprocessableEntity<ResponseApi<Omit<formData, "confirmed_password">>>(error)) {
+      if (isUnprocessableEntity<ErrorResponse<Omit<formData, "confirmed_password">>>(error)) {
         const formError = error.response?.data.data;
         if (formError) {
           Object.keys(formError).forEach((key) => {
@@ -67,17 +76,17 @@ export default function Register() {
 
   return (
     <div className="bg-orange">
-      <div className="max-w-7xl mx-auto px-4 container">
-        <div className="grid grid-cols-1 lg:grid-cols-5 py-12 lg:py-32 lg:pr-10">
+      <div className="container mx-auto max-w-7xl px-4">
+        <div className="grid grid-cols-1 py-12 lg:grid-cols-5 lg:py-32 lg:pr-10">
           <div className="lg:col-span-2 lg:col-start-4">
-            <form noValidate onSubmit={onSubmit} className="p-10 rounded bg-white shadow-sm">
+            <form noValidate onSubmit={onSubmit} className="rounded bg-white p-10 shadow-sm">
               <div className="text-2xl">Đăng Kí</div>
               <Input
                 register={register}
                 type="email"
                 className="mt-8"
                 errorMessage={errors.email?.message}
-                placeHolder="Email"
+                placeholder="Email"
                 name="email"
               />
 
@@ -87,7 +96,7 @@ export default function Register() {
                 type="password"
                 className="mt-2"
                 errorMessage={errors.password?.message}
-                placeHolder="Password"
+                placeholder="Password"
               />
 
               <Input
@@ -96,17 +105,21 @@ export default function Register() {
                 type="password"
                 className="mt-2"
                 errorMessage={errors.confirmed_password?.message}
-                placeHolder="Confirm Password"
+                placeholder="Confirm Password"
               />
               <div className="mt-2">
-                <button className="w-full text-center py-4 px-2 uppercase bg-red-500 hover:bg-red-600 text-white text-sm">
+                <ButtonRegister
+                  disabled={useRegisterMutation.isPending}
+                  isLoading={useRegisterMutation.isPending}
+                  className="w-full bg-red-500 px-2 py-4 text-center text-sm uppercase text-white hover:bg-red-600"
+                >
                   {" "}
                   Đăng Kí
-                </button>
+                </ButtonRegister>
               </div>
 
-              <div className="flex justify-center items-center mt-8">
-                <span className="text-gray-400 me-1"> Bạn đã có tài khoản</span>
+              <div className="mt-8 flex items-center justify-center">
+                <span className="me-1 text-gray-400"> Bạn đã có tài khoản</span>
                 <Link className="text-red-400" to={"/login"}>
                   Đăng nhập
                 </Link>
