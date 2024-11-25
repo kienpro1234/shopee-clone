@@ -9,6 +9,7 @@ import Profile from "./pages/Profile/Profile";
 import { useContext } from "react";
 import { AppContext } from "./context/app.context";
 import { path } from "./consts/const";
+import ProductDetail from "./pages/ProductDetail";
 
 function ProtectedRoute() {
   const { isAuthenticated } = useContext(AppContext);
@@ -53,11 +54,20 @@ function App() {
       ],
     },
     {
-      path: "/",
+      path: path.home,
       index: true,
       element: (
         <MainLayout>
           <ProductList />
+        </MainLayout>
+      ),
+    },
+    {
+      path: path.productDetail,
+      index: true,
+      element: (
+        <MainLayout>
+          <ProductDetail />
         </MainLayout>
       ),
     },

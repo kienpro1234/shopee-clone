@@ -26,8 +26,8 @@ createRoot(document.getElementById("root")!).render(
       <AppContextProvider>
         <App />
       </AppContextProvider>
-      <ToastContainer position="top-center" />
+      <ToastContainer position="top-center" autoClose={500} />
       <ReactQueryDevtools initialIsOpen={false} />
     </BrowserRouter>
-  </QueryClientProvider>
+  </QueryClientProvider>,
 );

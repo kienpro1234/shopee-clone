@@ -14,7 +14,8 @@ import { AppContext } from "../../context/app.context";
 import { toast } from "react-toastify";
 import ButtonRegister from "../../components/UI/ButtonRegister";
 
-type FormData = Omit<Schema, "confirmed_password" | "price_min" | "price_max">;
+type FormData = Pick<Schema, "email" | "password">;
+const schemaLogin = schema.pick(["email", "password"]);
 
 export default function Login() {
   const { login } = authApi;
@@ -27,7 +28,7 @@ export default function Login() {
     // getValues,
     formState: { errors },
   } = useForm<FormData>({
-    resolver: yupResolver(schema.omit(["confirmed_password", "price_min", "price_max"])),
+    resolver: yupResolver(schemaLogin),
   });
 
   const onSubmit = handleSubmit((data) => {

@@ -99,6 +99,7 @@ export const schema = yup
       message: "Giá không phù hợp",
       test: testMinMax,
     }),
+    name: yup.string().trim().required("Name search Không được bỏ trống"),
   })
   .required();
 

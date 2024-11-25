@@ -1,8 +1,9 @@
-import { forwardRef } from "react";
+import { forwardRef, useState } from "react";
 import type { RegisterOptions } from "react-hook-form";
 import React from "react";
 
-interface Props extends React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> {
+export interface InputNumberProps
+  extends React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLInputElement>, HTMLInputElement> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   errorMessage?: string;
   rules?: RegisterOptions;
@@ -10,7 +11,7 @@ interface Props extends React.DetailedHTMLProps<React.InputHTMLAttributes<HTMLIn
   classNameError?: string;
 }
 
-const InputNumber = forwardRef<HTMLInputElement, Props>(function InputNumber(
+const InputNumber = forwardRef<HTMLInputElement, InputNumberProps>(function InputNumber(
   {
     className,
     errorMessage,
@@ -20,20 +21,33 @@ const InputNumber = forwardRef<HTMLInputElement, Props>(function InputNumber(
     classNameInput = "p-3 w-full outline-none border border-gray-300 focus:border-gray-500 rounded-sm focus:shadow-sm",
     classNameError = "mt-1 text-red-600 min-h-[1.25rem] text-sm",
     onChange,
+    value = "",
     ...rest
   },
   ref,
 ) {
+  const [localValue, setLocalValue] = useState<string>(value as string);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     console.log("bro");
     const { value } = e.target;
-    if ((/^\d+$/.test(value) || value === "") && onChange) {
-      onChange(e);
+    if (/^\d+$/.test(value) || value === "") {
+      // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+      onChange && onChange(e);
+
+      //cập nhật localValue state
+      setLocalValue(value);
     }
   };
   return (
     <div className={className}>
-      <input autoComplete={autoComplete} className={classNameInput} {...rest} onChange={handleChange} ref={ref} />
+      <input
+        autoComplete={autoComplete}
+        className={classNameInput}
+        value={value || localValue}
+        {...rest}
+        onChange={handleChange}
+        ref={ref}
+      />
       <div className={classNameError}>{errorMessage}</div>
     </div>
   );

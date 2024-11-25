@@ -20,6 +20,8 @@ export interface formData {
   confirmed_password: string;
 }
 
+const schemaRegister = schema.pick(["email", "password", "confirmed_password"]);
+
 export default function Register() {
   const navigate = useNavigate();
   const { setIsAuthenticated, setProfile } = useContext(AppContext);
@@ -30,7 +32,7 @@ export default function Register() {
     setError,
     formState: { errors },
   } = useForm<formData>({
-    resolver: yupResolver(schema),
+    resolver: yupResolver(schemaRegister),
   });
 
   const onSubmit = handleSubmit((data) => {

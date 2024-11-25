@@ -1,7 +1,7 @@
 import { createSearchParams, Link, useNavigate } from "react-router-dom";
 import { path } from "../../../../consts/const";
 import ButtonRegister from "../../../../components/UI/ButtonRegister";
-import { QueryConfig } from "../../ProductList";
+
 import { Category } from "../../../../types/category.type";
 import classNames from "classnames";
 import InputNumber from "../../../../components/UI/InputNumber";
@@ -12,6 +12,7 @@ import { NoUndefinedField } from "../../../../types/utils.type";
 import { ObjectSchema } from "yup";
 import RatingStars from "../../../RatingStars";
 import _ from "lodash";
+import { QueryConfig } from "../../../../hooks/useQueryConfig";
 
 interface Props {
   queryConfig: QueryConfig;
@@ -65,7 +66,6 @@ export default function AsideFilter({ categories, queryConfig }: Props) {
     });
   };
 
-  console.log(createSearchParams(queryConfig).toString());
   return (
     <div className="py-4">
       <Link
