@@ -3,7 +3,7 @@ import { ProductListConfig } from "../../../../types/product.type";
 import classNames from "classnames";
 import { createSearchParams, Link, useNavigate } from "react-router-dom";
 import { path } from "../../../../consts/const";
-import _ from "lodash";
+import omit from "lodash/omit";
 import { QueryConfig } from "../../../../hooks/useQueryConfig";
 
 interface Props {
@@ -24,7 +24,7 @@ export default function SortProductList({ pageSize, queryConfig }: Props) {
     navigate({
       pathname: path.home,
       search: createSearchParams(
-        _.omit(
+        omit(
           {
             ...queryConfig,
             sort_by: sortByValue,

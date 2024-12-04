@@ -73,7 +73,7 @@ export default function Login() {
                 name="email"
                 register={register}
                 type="email"
-                className="mt-8"
+                className="relative mt-8"
                 errorMessage={errors.email?.message}
                 placeholder="Email"
                 autoComplete="on"
@@ -83,7 +83,7 @@ export default function Login() {
                 name="password"
                 register={register}
                 type="password"
-                className="mt-3"
+                className="relative mt-3"
                 errorMessage={errors.password?.message}
                 placeholder="Password"
                 autoComplete="on"

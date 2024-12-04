@@ -11,8 +11,9 @@ import { Schema, schema } from "../../../../utils/rules";
 import { NoUndefinedField } from "../../../../types/utils.type";
 import { ObjectSchema } from "yup";
 import RatingStars from "../../../RatingStars";
-import _ from "lodash";
+import omit from "lodash/omit";
 import { QueryConfig } from "../../../../hooks/useQueryConfig";
+import InputV2 from "../../../../components/InputV2";
 
 interface Props {
   queryConfig: QueryConfig;
@@ -60,9 +61,7 @@ export default function AsideFilter({ categories, queryConfig }: Props) {
   const handleRemoveAll = () => {
     navigate({
       pathname: path.home,
-      search: createSearchParams(
-        _.omit(queryConfig, ["price_max", "price_min", "rating_filter", "category"]),
-      ).toString(),
+      search: createSearchParams(omit(queryConfig, ["price_max", "price_min", "rating_filter", "category"])).toString(),
     });
   };
 
@@ -144,7 +143,7 @@ export default function AsideFilter({ categories, queryConfig }: Props) {
         <div>Khoảng giá</div>
         <form className="mt-2" onSubmit={onSubmit}>
           <div className="flex items-start">
-            <Controller
+            {/* <Controller
               control={control}
               name="price_min"
               render={({ field }) => {
@@ -165,6 +164,19 @@ export default function AsideFilter({ categories, queryConfig }: Props) {
                     // ref={field.ref}
                   />
                 );
+              }}
+            /> */}
+
+            <InputV2
+              control={control}
+              name="price_min"
+              type="number"
+              className="grow"
+              classNameError="hidden"
+              classNameInput="p-1 w-full outline-none border border-gray-300 focus:border-gray-500 rounded-sm focus:shadow-sm"
+              placeholder="₫ TỪ"
+              onChange={() => {
+                trigger("price_max");
               }}
             />
 

@@ -2,7 +2,7 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { yupResolver } from "@hookform/resolvers/yup";
-import _ from "lodash";
+import omit from "lodash/omit";
 
 import { schema } from "../../utils/rules";
 import authApi from "../../apis/auth.api";
@@ -36,7 +36,7 @@ export default function Register() {
   });
 
   const onSubmit = handleSubmit((data) => {
-    const body = _.omit(data, ["confirmed_password"]);
+    const body = omit(data, ["confirmed_password"]);
     useRegisterMutation.mutate(body);
   });
 

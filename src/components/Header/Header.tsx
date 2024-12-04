@@ -1,167 +1,36 @@
-import { createSearchParams, Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 import Popover from "../Popover/Popover";
 import { useContext } from "react";
 import { AppContext } from "../../context/app.context";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import authApi from "../../apis/auth.api";
-import { toast } from "react-toastify";
 import { path } from "../../consts/const";
-import useQueryConfig from "../../hooks/useQueryConfig";
-import { useForm } from "react-hook-form";
-import { schema, Schema } from "../../utils/rules";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { omit } from "lodash";
 import { purchasesStatus } from "../../consts/purchase.const";
 import purchaseApi from "../../apis/purchase.api";
 import noproductImg from "../../assets/images/no-product.png";
 
 import { formatCurrency } from "../../utils/utils";
+import NavHeader from "../NavHeader";
+import { useQuery } from "@tanstack/react-query";
+import useSearchProducts from "../../hooks/useSearchProducts";
 
 const MAX_PRODUCT_RENDER = 5;
-type FormData = Pick<Schema, "name">;
-const nameSchema = schema.pick(["name"]);
+
 export default function Header() {
-  const queryConfig = useQueryConfig();
-  const { register, handleSubmit } = useForm<FormData>({
-    defaultValues: {
-      name: "",
-    },
-    resolver: yupResolver(nameSchema),
-  });
-  const navigate = useNavigate();
-  const { logout } = authApi;
-  const { isAuthenticated, setIsAuthenticated, profile } = useContext(AppContext);
-  const registerMutation = useMutation({
-    mutationFn: logout,
-    onSuccess: () => {
-      toast.success("Đăng xuất thành công");
-      setIsAuthenticated(false);
-    },
-    onError: (err) => {
-      console.error(err);
-    },
-  });
+  const { onSubmit, register } = useSearchProducts();
+  const { isAuthenticated } = useContext(AppContext);
 
   const { data: purchasesInCartData } = useQuery({
     queryKey: ["purchases", { status: purchasesStatus.inCart }],
     queryFn: () => purchaseApi.getPurchases({ status: purchasesStatus.inCart }),
+    enabled: isAuthenticated,
   });
 
   const purchaseIncart = purchasesInCartData?.data.data;
 
-  const handleLogOut = () => {
-    registerMutation.mutate();
-  };
-
-  const onSubmit = handleSubmit((data) => {
-    const config = queryConfig.order
-      ? omit(
-          {
-            ...queryConfig,
-            name: data.name,
-          },
-          ["order", "sort_by"],
-        )
-      : {
-          ...queryConfig,
-          name: data.name,
-        };
-    navigate({
-      pathname: path.home,
-      search: createSearchParams(config).toString(),
-    });
-  });
   return (
     <div className="bg-[linear-gradient(-180deg,#f53d2d,#f63)] pb-5 pt-2">
       <div className="container">
-        <div className="flex justify-end">
-          <Popover
-            className="mx-3 flex cursor-pointer items-center py-1 capitalize text-white hover:text-white/70"
-            renderPopover={
-              <div className="relative rounded-sm border border-gray-200 bg-white shadow-md">
-                <div className="flex flex-col py-2 pl-3 pr-28">
-                  <button className="border-none px-3 py-2 hover:text-orange">Tiếng Việt</button>
-                  <button className="mt-2 border-none px-3 py-2 hover:text-orange">English</button>
-                </div>
-              </div>
-            }
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="size-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 21a9.004 9.004 0 0 0 8.716-6.747M12 21a9.004 9.004 0 0 1-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 0 1 7.843 4.582M12 3a8.997 8.997 0 0 0-7.843 4.582m15.686 0A11.953 11.953 0 0 1 12 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0 1 21 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0 1 12 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 0 1 3 12c0-1.605.42-3.113 1.157-4.418"
-              />
-            </svg>
-            <span>Tiếng việt</span>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="size-6"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-            </svg>
-          </Popover>
-          {isAuthenticated && (
-            <Popover
-              className="flex cursor-pointer items-center py-1 hover:text-gray-300"
-              renderPopover={
-                <div className="relative rounded-sm border border-gray-200 bg-white shadow-md">
-                  <Link
-                    to={path.profile}
-                    className="block w-full bg-white px-4 py-3 text-left hover:bg-slate-100 hover:text-cyan-500"
-                  >
-                    Tài khoản của tôi
-                  </Link>
-                  <Link
-                    to={"/"}
-                    className="block w-full bg-white px-3 py-2 text-left hover:bg-slate-100 hover:text-cyan-500"
-                  >
-                    Đơn mua
-                  </Link>
-
-                  <button
-                    onClick={handleLogOut}
-                    className="block w-full bg-white px-3 py-2 text-left hover:bg-slate-100 hover:text-cyan-500"
-                  >
-                    Đăng xuất
-                  </button>
-                </div>
-              }
-            >
-              <div className="mr-2 h-5 w-5 flex-shrink-0">
-                <img
-                  src="https://images.viblo.asia/f1f7004c-cd83-4a78-8d99-27f0247e872a.png"
-                  alt=""
-                  className="h-full w-full rounded-full object-cover"
-                />
-              </div>
-              <div>{profile?.email}</div>
-            </Popover>
-          )}
-          {!isAuthenticated && (
-            <div className="flex items-center">
-              <Link to={path.register} className="mx-3 capitalize text-white hover:text-white/70">
-                Đăng kí
-              </Link>
-              <div className="h-4 border-r-[1px] border-r-white/40"></div>
-              <Link to={path.login} className="mx-3 capitalize text-white hover:text-white/70">
-                Đăng nhập
-              </Link>
-            </div>
-          )}
-        </div>
+        <NavHeader />
         <div className="mt-4 grid grid-cols-12 items-center gap-4">
           <Link to={"/"} className="col-span-2">
             <svg viewBox="0 0 192 65" className="h-8 w-full fill-white lg:h-11">
@@ -202,7 +71,7 @@ export default function Header() {
             placement="bottom-start"
             renderPopover={
               <div className="relative max-w-[400px] rounded-sm border border-gray-200 bg-white text-sm shadow-md">
-                {purchaseIncart ? (
+                {purchaseIncart && purchaseIncart.length > 0 ? (
                   <div className="">
                     <div className="p-2 capitalize text-gray-400">Sản phẩm mới thêm</div>
                     <div className="mt-5">
@@ -229,9 +98,12 @@ export default function Header() {
                         {purchaseIncart.length > MAX_PRODUCT_RENDER ? purchaseIncart.length - MAX_PRODUCT_RENDER : ""}
                         Thêm vào giỏ hàng
                       </div>
-                      <button className="hover:bg-opcity-90 rounded-sm bg-orange px-4 py-2 capitalize text-white">
+                      <Link
+                        to={path.cart}
+                        className="hover:bg-opcity-90 rounded-sm bg-orange px-4 py-2 capitalize text-white"
+                      >
                         Xem giỏ hàng
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 ) : (
@@ -258,9 +130,11 @@ export default function Header() {
                   d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 0 0-16.536-1.84M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
                 />
               </svg>
-              <span className="absolute -right-1 -top-1 flex size-3 items-center justify-center rounded-full bg-white p-1 text-[9px] text-orange">
-                {purchaseIncart?.length}
-              </span>
+              {purchaseIncart && purchaseIncart.length > 0 && (
+                <span className="absolute -right-1 -top-1 flex size-3 items-center justify-center rounded-full bg-white p-1 text-[9px] text-orange">
+                  {purchaseIncart?.length}
+                </span>
+              )}
             </Link>
           </Popover>
         </div>

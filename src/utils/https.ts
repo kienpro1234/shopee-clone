@@ -25,7 +25,7 @@ class Http {
         }
         return config;
       },
-      (err) => Promise.reject(err)
+      (err) => Promise.reject(err),
     );
 
     this.instance.interceptors.response.use(
@@ -44,13 +44,18 @@ class Http {
       },
       (error: AxiosError) => {
         if (error.response?.status !== HttpStatusCode.UnprocessableEntity) {
+          console.log("data trả về", error);
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const data: any | undefined = error.response?.data;
-          const message = data.message || error.message;
+
+          const message = data?.message || error.message;
           toast.error(message);
         }
+        if (error.response?.status === HttpStatusCode.Unauthorized) {
+          clearLS();
+        }
         return Promise.reject(error);
-      }
+      },
     );
   }
 }
